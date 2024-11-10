@@ -6,16 +6,16 @@ import { GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg } fr
 import { Answer } from "./entity/Answer"
 
 
-const mariadb:DataSourceOptions = {
-    type: "mariadb",
-    host: "cocoball.vip",
+const hwmysql:DataSourceOptions = {
+    type: "mysql",
+    host: "122.9.117.69",
     port: 3306,
-    username: "root",
-    password: "cnm-sb-heike-123456",
+    username: "minimall",
+    password: "Qwertyuiop123",
     database: "minimall",
     synchronize: true,
     logging: false,
-    entities: [User, GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg],
+    entities: [User, GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg,Answer,SysUser],
     migrations: [],
     subscribers: [],
 }
@@ -32,4 +32,5 @@ let mysqldb:DataSourceOptions = {
     migrations: [],
     subscribers: [],
 }
-export const AppDataSource = new DataSource(mysqldb)
+
+export const AppDataSource = new DataSource(hwmysql)
