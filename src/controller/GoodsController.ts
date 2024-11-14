@@ -2,7 +2,6 @@ import { AppDataSource } from "../data-source"
 import { NextFunction, Request, Response } from "express"
 
 import { GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg } from '../entity/Goods'
-import { GoodsTypeRes } from '../domain/Goods'
 import { generationToken, storeUserPassword, currentFormattedTime } from "../tools/tools"
 import { In } from "typeorm";
 

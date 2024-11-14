@@ -1,11 +1,11 @@
 import { UserController } from "./controller/UserController"
 import { GoodsController } from "./controller/GoodsController"
 import { AnswerController } from "./controller/AnswerController"
-import { body, checkSchema } from 'express-validator';
+import { OrderController } from "./controller/OrderController"
+import { checkSchema } from 'express-validator';
 
 
-
-export const Routes = [
+export const routes = [
     {
         method: "post",
         route: "/api/v1/login", // 登录
@@ -116,5 +116,39 @@ export const Routes = [
         controller: AnswerController,
         action: "getAnswer",
         verify: checkSchema({})
+    },
+    {
+        method: "post",
+        route: "/api/v1/createOrder", // 创建订单
+        controller: OrderController,
+        action: "createOrder",
+        verify: checkSchema({
+            email: {
+                isEmail: true,
+                errorMessage: '邮箱必填',
+                trim: true,
+            }
+        })
+    },
+    {
+        method: "post",
+        route: "/api/v1/notifyUrl", // 蓝兔支付通知回调
+        controller: OrderController,
+        action: "notifyUrl",
+        verify: checkSchema({})
+    },
+    {
+        method: "post",
+        route: "/api/v1/order/page",// 支付回调订单详情
+        controller: OrderController,
+        action: "callbackOrderDetails",
+        verify: checkSchema({})
     }
 ]
+
+// 收集系统所有路径
+export const route = []
+routes.forEach(r => {
+    route.push(r.route.split(':')[0])
+})
+

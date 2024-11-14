@@ -2,11 +2,12 @@ import * as express from "express"
 import * as bodyParser from "body-parser"
 import { Request, Response } from "express"
 import { AppDataSource } from "./data-source"
-import { Routes } from "./routes"
+import { routes,route } from "./routes"
 import { jwtVerify } from "./tools/tools"
-import { urlPath,routes } from "./config"
-
-
+import { urlPath } from "./config"
+import { customAlphabet } from "nanoid"
+// 初始化nanoid
+export const nanoid = customAlphabet('1234567890QWERTYUIOPASDFGHJKLZXCVBNM', 6);
 
 AppDataSource.initialize().then(async () => {
     // create express app
@@ -16,7 +17,7 @@ AppDataSource.initialize().then(async () => {
         const originalUrl = req.originalUrl
         console.log('请求路径: ', originalUrl, '请求参数：', req.body)
         // 只能访问系统提供的路径
-        if (!routes.includes(originalUrl)) {
+        if (!route.includes(originalUrl)) {
             return res.json({ code: 500, message: '404' })
         }
         // 放行指定api以及校验token
@@ -40,7 +41,7 @@ AppDataSource.initialize().then(async () => {
         next()
     })
     // register express routes from defined application routes
-    Routes.forEach(route => {
+    routes.forEach(route => {
         (app as any)[route.method](route.route,route.verify, (req: Request, res: Response, next: Function) => {
             const result = (new (route.controller as any))[route.action](req, res, next)
             if (result instanceof Promise) {
@@ -58,7 +59,7 @@ AppDataSource.initialize().then(async () => {
     app.listen(3000)
 
 
-    console.log("Express server has started on port 3000. Open http://localhost:3000/users to see results")
+    console.log("Express server has started on port 3000. Open http://localhost:3000 to see results")
 
 }).catch(error => console.log(error))
 

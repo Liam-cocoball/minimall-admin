@@ -4,6 +4,7 @@ import { User } from "./entity/User"
 import { SysUser } from "./entity/SysUser"
 import { GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg } from "./entity/Goods"
 import { Answer } from "./entity/Answer"
+import { Order } from "./entity/Order"
 
 
 const hwmysql:DataSourceOptions = {
@@ -15,7 +16,7 @@ const hwmysql:DataSourceOptions = {
     database: "minimall",
     synchronize: true,
     logging: false,
-    entities: [User, GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg,Answer,SysUser],
+    entities: [User, GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg,Answer,SysUser,Order],
     migrations: [],
     subscribers: [],
 }
