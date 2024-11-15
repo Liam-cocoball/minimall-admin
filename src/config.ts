@@ -29,7 +29,7 @@ export const OrderConfig = {
         Ye: 3,
     },
     // 商户id
-    mchId: 1699096136,
+    mchId: '1699096136',
     // 支付通知地址
     notify_url: 'http://minimall.cocoball.vip/api/v1/notifyUrl',
     // 支付回调地址
@@ -40,8 +40,6 @@ export const OrderConfig = {
     apiMethod: 'post',
     // api支付地址
     apiUrl: 'https://api.ltzf.cn/api/wxpay/jsapi_convenient',
-    // api支付请求头配置
-    apiHeadersConf: {
-        contentType: 'application/x-www-form-urlencoded'
-    },
+    // 支付订单过期时间
+    timeExpire:'15m'
 }

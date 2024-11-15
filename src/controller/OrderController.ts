@@ -9,6 +9,7 @@ import { OrderConfig } from "../config"
 import { validationResult } from 'express-validator';
 import { nanoid } from "../index"
 import axios from "axios"
+import  qs  from "qs";
 
 
 
@@ -82,7 +83,7 @@ export class OrderController {
         if (result.array().length > 0) {
             return { code: 501, message: MessageInfo.Fail, data: result.array() }
         }
-        const { email, goodsId, playFunc, userId, mchId, count } = request.body
+        const { email, goodsId, playFunc, userId, count } = request.body
         // 生成订单
         const order = new Order()
         order.email = email
@@ -119,12 +120,7 @@ export class OrderController {
             }
             order.userId = user.id
         }
-        // 判断商户id是否正常
-        if (mchId !== OrderConfig.mchId) {
-            return { code: 500, msg: MessageInfo.MchId, data: {} }
-        }
-        order.mchId = mchId
-        let lantudata = {}
+        let lantudata: any
         try {
             await this.orderRepository.save(order)
             //事务 保存订单 并且减去库存
@@ -144,12 +140,13 @@ export class OrderController {
                 }
                 // 发送支付请求
                 const params = {
-                    mch_id: mchId,
+                    mch_id: OrderConfig.mchId,
                     out_trade_no: order.orderNumber,
-                    total_fee: order.playMoney,
+                    total_fee: order.playMoney.toString(),
                     body: goods.name + goods.title,
-                    timestamp: timestampInSeconds(),
-                    notify_url: OrderConfig.notify_url
+                    timestamp: timestampInSeconds().toString(),
+                    notify_url: OrderConfig.notify_url,
+                    time_expire: OrderConfig.timeExpire
                 }
                 // 签名
                 const sign = wxPaySign(params, OrderConfig.mchSign)
@@ -176,11 +173,12 @@ export class OrderController {
                 await axios({
                     method: OrderConfig.apiMethod,
                     url: OrderConfig.apiUrl,
-                    headers: OrderConfig.apiHeadersConf,
-                    data: params
+                    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                    data: qs.stringify(params)
                 }).then(
                     (res) => {
-                        lantudata = res
+                        console.log(res.data)
+                        lantudata = res.data
                     },
                     (err) => {
                         console.log(err)
