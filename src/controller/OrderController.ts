@@ -9,7 +9,7 @@ import { OrderConfig } from "../config"
 import { validationResult } from 'express-validator';
 import { nanoid } from "../index"
 import axios from "axios"
-import  qs  from "qs";
+import qs from "qs";
 
 
 
@@ -151,6 +151,7 @@ export class OrderController {
                 // 签名
                 const sign = wxPaySign(params, OrderConfig.mchSign)
                 order.sign = sign
+                console.log('订单数据：', order)
                 await transactionalEntityManager.save(order).catch(er => {
                     console.log("保存订单错误: ", er)
                 })
@@ -186,9 +187,13 @@ export class OrderController {
                     }
                 )
             })
-        } catch {
+        } catch (err) {
+            console.log(err)
             return { code: 500, msg: MessageInfo.OrderCreateFail, data: {} }
         }
+        // if (lantudata.code === 0) {
+        //     return { code: 500, msg: MessageInfo.OrderCreateFail, data: lantudata }
+        // }
         return { code: 200, msg: MessageInfo.OrderCreateSuccess, data: lantudata }
     }
 
