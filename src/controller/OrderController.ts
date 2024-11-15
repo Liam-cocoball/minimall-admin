@@ -9,7 +9,8 @@ import { OrderConfig } from "../config"
 import { validationResult } from 'express-validator';
 import { nanoid } from "../index"
 import axios from "axios"
-import qs from "qs";
+import FormData = require("form-data")
+
 
 
 
@@ -170,12 +171,17 @@ export class OrderController {
                     }
                 })
                 console.log('请求参数：', params)
+                const formData = new FormData()
+                Object.keys(params).forEach(key => {
+                    formData.append(key, params[key])
+                })
+                console.log('表单：',formData)
                 // 发送请求 https://www.ltzf.cn/doc
                 await axios({
                     method: OrderConfig.apiMethod,
                     url: OrderConfig.apiUrl,
                     headers: { 'content-type': 'application/x-www-form-urlencoded' },
-                    data: qs.stringify(params)
+                    data: formData
                 }).then(
                     (res) => {
                         console.log(res.data)
