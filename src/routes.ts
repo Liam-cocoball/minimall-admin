@@ -2,7 +2,11 @@ import { UserController } from "./controller/UserController"
 import { GoodsController } from "./controller/GoodsController"
 import { AnswerController } from "./controller/AnswerController"
 import { OrderController } from "./controller/OrderController"
-import { checkSchema } from 'express-validator';
+import { checkSchema, query } from 'express-validator';
+
+
+// const notifyUrlParam = ["code","timestamp","mch_id","order_no","out_trade_no","pay_no","total_fee","sign","pay_channel","trade_type","success_time","openid"]
+const notifyUrlParam = ['code']
 
 
 export const routes = [
@@ -137,12 +141,13 @@ export const routes = [
         action: "notifyUrl",
         verify: checkSchema({})
     },
+
     {
-        method: "post",
+        method: "get",
         route: "/api/v1/order/page",// 支付回调订单详情
         controller: OrderController,
         action: "callbackOrderDetails",
-        verify: checkSchema({})
+        verify: query('orderNumber').notEmpty()
     }
 ]
 

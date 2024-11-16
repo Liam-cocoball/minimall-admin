@@ -32,8 +32,8 @@ export const OrderConfig = {
     mchId: '1699096136',
     // 支付通知地址
     notify_url: 'http://minimall.cocoball.vip/api/v1/notifyUrl',
-    // 支付回调地址
-    return_url: 'http://minimall.cocoball.vip/api/v1/order/page',
+    // 支付成功后用户点击返回商户地址
+    return_url: 'http://minimall.cocoball.vip',
     // 商户密钥
     mchSign: 'ca2d39fa2344e8527a29c107da5b7cd6',
     // api支付请求模式

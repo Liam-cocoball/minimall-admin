@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm'
-import { Content } from './Content'
+
 
 @Entity('order')
 export class Order {
@@ -8,9 +8,12 @@ export class Order {
     // 订单号：MM+用户id+当前时间戳秒
     @Column({ name: 'order_number', type: 'varchar', length: 20 })
     orderNumber: string
-    // 商品id
+    // 商品spu id
     @Column({ name: 'goods_id', type: 'bigint' })
     goodsId: number
+    // 商品sku id
+    @Column({ name: 'goods_info_id', type: 'bigint' })
+    goodsInfoId: number
     // 支付金额
     @Column({ name: 'play_money', type: 'decimal', precision: 10, scale: 2 })
     playMoney: number
@@ -31,10 +34,13 @@ export class Order {
     email: string
     // 商户id
     @Column({ name: 'mch_id' })
-    mchId: number
+    mchId: string
     // 创建此订单密钥
     @Column()
     sign: string
+    // 蓝兔支付地址
+    @Column({ name: 'lantu_play_data', type: 'json' })
+    lantuPlayData: string
     // 创建时间
     @CreateDateColumn({ name: 'create_time' })
     createTime: string
