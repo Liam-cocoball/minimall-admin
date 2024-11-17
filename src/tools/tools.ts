@@ -20,12 +20,14 @@ const transporter = nodemailer.createTransport({
 // 异步函数，用于发送邮件
 export async function sendMail(toemail: string, subject: string, html: string) {
     try {
-        const info = await transporter.sendMail({
+        const email = {
             from: emailConfig.name + ' < ' + emailConfig.auth.user + ' > ',
             to: toemail,
             subject: subject,
             html: html,
-        })
+        }
+        console.log('email 参数: ', email)
+        const info = await transporter.sendMail(email)
         console.log("Message sent: %s", info.messageId)
     } catch (err) {
         console.log("发送邮箱失败," + err)

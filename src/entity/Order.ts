@@ -38,6 +38,9 @@ export class Order {
     // 创建此订单密钥
     @Column()
     sign: string
+    // 消息通知 1-通知 -1 未通知
+    @Column({ default: -1 })
+    isNotify: number
     // 蓝兔支付地址
     @Column({ name: 'lantu_play_data', type: 'json' })
     lantuPlayData: string

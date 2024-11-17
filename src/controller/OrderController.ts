@@ -9,7 +9,6 @@ import { validationResult } from 'express-validator';
 import { nanoid } from "../index"
 import axios from "axios"
 import FormData = require("form-data")
-
 import { Mutex } from 'async-mutex';
 
 
@@ -22,39 +21,35 @@ export class OrderController {
     // 支付通知地址（蓝兔回调此地址，修改订单状态） https://www.ltzf.cn/doc
     async notifyUrl(request: Request, response: Response, next: NextFunction) {
         const { code, timestamp, mch_id, order_no, out_trade_no, pay_no, total_fee, sign, pay_channel, trade_type, success_time, attach, openid } = request.body
+        if (code !== '0') {
+            return 'FAIL'
+        }
         // 验证sign是否正确，避免假回调
         const mySign = wxPaySign({ code, timestamp, mch_id, order_no, out_trade_no, pay_no, total_fee }, OrderConfig.mchSign)
         if (sign !== mySign) {
             console.log('sing 校验失败')
-            return { code: 1, msg: 'FAIL' }
+            return 'FAIL'
         }
-        let ordertem
-        try {
-            await AppDataSource.manager.transaction(async (transactionalEntityManager) => {
-                // 根据out_trade_no和mch_id查询对应订单。判断订单状态。成功直接返回 失败查询code是否成功，成功就需要修改订单状态
-                ordertem = await transactionalEntityManager.findOneBy(Order, { mchId: mch_id, orderNumber: out_trade_no })
-                if (!ordertem) {
-                    throw new Error('order: ' + out_trade_no + ' not font')
-                }
-                //处理订单
-                if (code !== '0') {
-                    throw new Error('user play order fail')
-                }
-                ordertem.state = 1
-                ordertem = await transactionalEntityManager.save(ordertem)
-                if (!ordertem) {
-                    throw new Error('update order fail')
-                }
-            })
-        } catch {
-            return { code: 1, msg: 'FAIL' }
-        }
+        // 根据out_trade_no和mch_id查询对应订单。判断订单状态。成功直接返回 失败查询code是否成功，成功就需要修改订单状态
+        let ordertem = await this.orderRepository.findOneBy({ mchId: mch_id, orderNumber: out_trade_no })
         if (!ordertem) {
-            if (ordertem.state !== 1) {
-                return { code: 1, msg: 'FAIL' }
-            }
+            console.log('未查询到此订单：' + out_trade_no)
+            return 'FAIL'
         }
-        return { code: 200, msg: 'SUCCESS' }
+        if (ordertem.state === 1) {
+            return 'SUCCESS'
+        }
+        // 状态改成成功
+        ordertem.state = 1
+        // 消息已经发送
+        ordertem.isNotify = 1
+        await this.orderRepository.save(ordertem).then(res => { }, err => {
+            console.log('修改订单状态失败：', err)
+        })
+        // 发送消息通知
+        const goods = await this.goodsRepository.findOne({ select: ['name'], where: { id: ordertem.goodsId } })
+        await sendMail('2313988763@qq.com', goods.name, '[minimall]: 您有新的订单，请及时处理，订单编号为：' + ordertem.orderNumber)
+        return 'SUCCESS'
     }
 
     //创建订单
@@ -171,8 +166,6 @@ export class OrderController {
                             throw new Error('蓝兔支付api 响应错误code')
                         }
                         order.lantuPlayData = JSON.stringify(lantudata)
-                        // 发送消息通知
-                        sendMail('2313988763@qq.com', goods.name + goods.title, '[minimall]: 有人下单，请及时处理')
                     },
                     (err) => {
                         console.log(err)
