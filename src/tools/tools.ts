@@ -1,9 +1,40 @@
 import * as jose from 'jose'
 import { Md5 } from 'ts-md5'
 
+
+import nodemailer = require("nodemailer");
+import { emailConfig } from '../config';
+
+
+// 创建Transport对象，使用QQ邮箱的SMTP服务器信息
+const transporter = nodemailer.createTransport({
+    host: emailConfig.host, // QQ邮箱的SMTP服务器地址
+    port: emailConfig.port, // 使用SSL时选择465，使用STARTTLS时选择587
+    secure: emailConfig.secure, // 如果使用465端口，则设置为true
+    auth: {
+        user: emailConfig.auth.user, // 你的QQ邮箱地址
+        pass: emailConfig.auth.pass, // QQ邮箱的SMTP授权码
+    },
+});
+
+// 异步函数，用于发送邮件
+export async function sendMail(toemail: string, subject: string, html: string) {
+    try {
+        const info = await transporter.sendMail({
+            from: emailConfig.name + ' < ' + emailConfig.auth.user + ' > ',
+            to: toemail,
+            subject: subject,
+            html: html,
+        })
+        console.log("Message sent: %s", info.messageId)
+    } catch (err) {
+        console.log("发送邮箱失败," + err)
+    }
+}
+
+
+// jwt密钥
 const secret = new TextEncoder().encode('0f259c900c0e896f8162a73b89630fa0')
-
-
 
 // 生成token
 export function generationToken(payload: jose.JWTPayload): Promise<string> {

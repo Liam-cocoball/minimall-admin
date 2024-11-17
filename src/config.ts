@@ -41,5 +41,23 @@ export const OrderConfig = {
     // api支付地址
     apiUrl: 'https://api.ltzf.cn/api/wxpay/jsapi_convenient',
     // 支付订单过期时间
-    timeExpire:'15m'
+    timeExpire: '15m'
+}
+// 邮箱配置
+export const emailConfig = {
+    // 发送邮箱名字
+    name: 'minimall',
+    // QQ邮箱的SMTP服务器地址
+    host: "smtp.qq.com",
+    // 使用SSL时选择465，使用STARTTLS时选择587
+    port: 465,
+    // 如果使用465端口，则设置为true
+    secure: true,
+    auth: {
+        // 你的QQ邮箱地址
+        user: "2313988763@qq.com",
+        // QQ邮箱的SMTP授权码
+        pass: "vpzybihsiuojdjbi",
+    },
+    templateHtml:''
 }

@@ -2,16 +2,15 @@ import { AppDataSource } from "../data-source"
 import { NextFunction, Request, Response } from "express"
 import { Order } from '../entity/Order'
 import { Goods, GoodsInfo } from '../entity/Goods'
-import { User } from '../entity/User'
 import { MessageInfo } from "../tip/tip"
-import { wxPaySign, timestampInSeconds } from "../tools/tools"
+import { wxPaySign, timestampInSeconds, sendMail } from "../tools/tools"
 import { OrderConfig } from "../config"
 import { validationResult } from 'express-validator';
 import { nanoid } from "../index"
 import axios from "axios"
 import FormData = require("form-data")
 
-import { Mutex, MutexInterface, Semaphore, SemaphoreInterface, withTimeout } from 'async-mutex';
+import { Mutex } from 'async-mutex';
 
 
 export class OrderController {
@@ -27,7 +26,7 @@ export class OrderController {
         const mySign = wxPaySign({ code, timestamp, mch_id, order_no, out_trade_no, pay_no, total_fee }, OrderConfig.mchSign)
         if (sign !== mySign) {
             console.log('sing 校验失败')
-            return { code: 'FAIL' }
+            return { code: 1, msg: 'FAIL' }
         }
         let ordertem
         try {
@@ -48,14 +47,14 @@ export class OrderController {
                 }
             })
         } catch {
-            return { code: 'FAIL' }
+            return { code: 1, msg: 'FAIL' }
         }
         if (!ordertem) {
             if (ordertem.state !== 1) {
-                return { code: 'FAIL' }
+                return { code: 1, msg: 'FAIL' }
             }
         }
-        return { code: 'SUCCESS' }
+        return { code: 200, msg: 'SUCCESS' }
     }
 
     //创建订单
@@ -172,6 +171,8 @@ export class OrderController {
                             throw new Error('蓝兔支付api 响应错误code')
                         }
                         order.lantuPlayData = JSON.stringify(lantudata)
+                        // 发送消息通知
+                        sendMail('2313988763@qq.com', goods.name + goods.title, '[minimall]: 有人下单，请及时处理')
                     },
                     (err) => {
                         console.log(err)

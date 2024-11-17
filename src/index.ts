@@ -9,6 +9,7 @@ import { customAlphabet } from "nanoid"
 // 初始化nanoid
 export const nanoid = customAlphabet('1234567890QWERTYUIOPASDFGHJKLZXCVBNM', 6);
 
+
 AppDataSource.initialize().then(async () => {
     const app = express()
     app.use(express.urlencoded({ extended: true }));
