@@ -7,7 +7,7 @@ import { Answer } from "./entity/Answer"
 import { Order } from "./entity/Order"
 
 
-const hwmysql:DataSourceOptions = {
+const hwmysql: DataSourceOptions = {
     type: "mysql",
     host: "122.9.117.69",
     port: 3306,
@@ -16,11 +16,11 @@ const hwmysql:DataSourceOptions = {
     database: "minimall",
     synchronize: true,
     logging: false,
-    entities: [User, GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg,Answer,SysUser,Order],
+    entities: [User, GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg, Answer, SysUser, Order],
     migrations: [],
     subscribers: [],
 }
-let mysqldb:DataSourceOptions = {
+let mysqldb: DataSourceOptions = {
     type: "mysql",
     host: "localhost",
     port: 3306,
@@ -29,9 +29,12 @@ let mysqldb:DataSourceOptions = {
     database: "minimall",
     synchronize: true,
     logging: false,
-    entities: [User, GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg,Answer,SysUser],
+    entities: [User, GoodsType, GoodsSpecs, GoodsSpecsInfo, Goods, GoodsInfo, GoodsTarg, Answer, SysUser],
     migrations: [],
     subscribers: [],
+    cache: {
+        duration: 30000 // 30 seconds
+    }
 }
 
 export const AppDataSource = new DataSource(hwmysql)

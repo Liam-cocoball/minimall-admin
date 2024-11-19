@@ -103,7 +103,7 @@ export class OrderController {
                     throw new Error("查询商品错误")
                 }
                 order.goodsInfoId = goodsId
-                order.playMoney = gooddsInfo.couponPrice
+                order.playMoney = parseInt((gooddsInfo.couponPrice * order.count).toFixed(2))
                 order.goodsId = goods.id
                 order.mchId = OrderConfig.mchId
                 // 组合支付请求参数
