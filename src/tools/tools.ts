@@ -89,3 +89,20 @@ export function wxPaySign(params: any, key: any) {
 export function timestampInSeconds(): number {
     return Math.floor(new Date().getTime() / 1000)
 }
+
+
+export function arraysAreEqual<T>(arr1, arr2) {
+    // 将数组转换为集合，并排序（先排序是为了确保集合中的元素顺序一致）
+    const set1 = new Set<T>(arr1.sort());
+    const set2 = new Set<T>(arr2.sort());
+    // 比较两个集合是否相等
+    if (set1.size !== set2.size) {
+        return false;
+    }
+    set1.forEach(item => {
+        if (!set2.has(item)) {
+            return false;
+        }
+    })
+    return true;
+}

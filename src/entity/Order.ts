@@ -47,11 +47,40 @@ export class Order {
     // 创建时间
     @CreateDateColumn({ name: 'create_time' })
     createTime: string
+    // 支付时间
+    @Column({ type: 'timestamp', name: 'play_time', nullable: true })
+    playTime: string
     // 修改时间
     @UpdateDateColumn({ name: 'update_time' })
     updateTime: string
+    // skuid
+    @Column()
+    skuid: string
 }
 
+export class OrderE {
+    orderNumber: string
+    goodsId: number
+    goodsInfoId: number
+    playMoney: number
+    count: number
+    playFunc: number
+    state: number
+    email: string
+    createTime: string
+    updateTime: string
+    playTime: string
+    goods: {
+        name: string
+        title: string
+        images: string
+    }
+    goodsinfo: {
+        price: number
+        couponPrice: number
+    }
+    sku: string[]
+}
 // 支付通知回调参数
 // export class NotifyUrlData {
 //     code: ''

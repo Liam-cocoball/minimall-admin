@@ -1,20 +1,25 @@
 import { AppDataSource } from "../data-source"
 import { NextFunction, Request, Response } from "express"
-import { Order } from '../entity/Order'
-import { Goods, GoodsInfo } from '../entity/Goods'
+import { Order, OrderE } from '../entity/Order'
+import { Goods, GoodsInfo, GoodsSpecsInfo } from '../entity/Goods'
 import { MessageInfo } from "../tip/tip"
-import { wxPaySign, timestampInSeconds, sendMail } from "../tools/tools"
+import { wxPaySign, timestampInSeconds, sendMail, currentFormattedTime, arraysAreEqual } from "../tools/tools"
 import { OrderConfig } from "../config"
 import { validationResult } from 'express-validator';
 import { nanoid } from "../index"
 import axios from "axios"
 import FormData = require("form-data")
 import { Mutex } from 'async-mutex';
+import { In } from "typeorm"
+
 
 
 export class OrderController {
     private orderRepository = AppDataSource.getRepository(Order)
     private goodsRepository = AppDataSource.getRepository(Goods)
+    private goodsInfoRepository = AppDataSource.getRepository(GoodsInfo)
+    private goodsSpecsInfoRepository = AppDataSource.getRepository(GoodsSpecsInfo)
+
     // 互斥锁
     private mutex = new Mutex()
 
@@ -39,10 +44,9 @@ export class OrderController {
         if (ordertem.state === 1) {
             return 'SUCCESS'
         }
-        // 状态改成成功
         ordertem.state = 1
-        // 消息已经发送
         ordertem.isNotify = 1
+        ordertem.playTime = currentFormattedTime()
         await this.orderRepository.save(ordertem).then(res => { }, err => {
             console.log('修改订单状态失败：', err)
         })
@@ -60,7 +64,7 @@ export class OrderController {
             return { code: 501, message: MessageInfo.Fail, data: result.array() }
         }
         // 参数
-        const { email, goodsId, playFunc, count } = request.body
+        const { email, goodsId, playFunc, count, skuid } = request.body
         // 生成订单
         let order = new Order()
         order.email = email
@@ -91,12 +95,14 @@ export class OrderController {
                 // 查询sku
                 const gooddsInfo = await transactionalEntityManager.findOneBy(GoodsInfo, { id: goodsId })
                 if (!gooddsInfo) {
-                    throw new Error("商品库存不足，创建订单失败")
+                    throw new Error(MessageInfo.Fail)
                 }
                 // 判断当前下单数量不能大于库存
                 if (order.count > gooddsInfo.inventory) {
-                    throw new Error("商品库存不足，创建订单失败")
+                    throw new Error("商品库存不足")
                 }
+                //TODO 用户传入的skuid要和数据库中的skuid比较，防止直接调用接口乱传入参数
+                order.skuid = skuid
                 // 查询spu
                 const goods = await transactionalEntityManager.findOneBy(Goods, { id: gooddsInfo.goodsId })
                 if (!goods) {
@@ -191,6 +197,7 @@ export class OrderController {
         return { code: 200, msg: MessageInfo.OrderCreateSuccess, data: { orderNumber: order.orderNumber } }
     }
 
+
     // 支付回调订单详情页面
     async callbackOrderDetails(request: Request, response: Response, next: NextFunction) {
         const result = validationResult(request);
@@ -223,6 +230,71 @@ export class OrderController {
                 }
             }
         }
+    }
+
+    //TODO 查询订单列表 后期需要优化... 暂时这样写了...
+    async orderList(request: Request, response: Response, next: NextFunction) {
+        const result = validationResult(request);
+        if (result.array().length > 0) {
+            return { code: 501, message: MessageInfo.Fail, data: result.array() }
+        }
+        const { email } = request.query
+        // 查询订单
+        let orderlist: Order[]
+        await this.orderRepository.find({
+            select: ['createTime', 'orderNumber', 'goodsId', 'goodsInfoId', 'playMoney', 'playFunc', 'state', 'email', 'count', 'playTime'],
+            where: { email }
+        }).then(res => {
+            orderlist = res
+        }, err => {
+            console.log(err)
+            return { code: 200, msg: MessageInfo.Success, data: {} }
+        })
+        // 查询商品
+        let Ordertemp: OrderE[] = []
+        if (orderlist !== undefined) {
+            for (let i = 0; i < orderlist.length; i++) {
+                const order = new OrderE()
+                Object.assign(order, orderlist[i]);
+                let goods: Goods
+                await this.goodsRepository.findOneBy({ id: order.goodsId }).then(res => {
+                    goods = res
+                }, err => {
+                    console.log(err)
+                    return { code: 200, msg: MessageInfo.Fail, data: {} }
+                })
+                let goodsinfo: GoodsInfo
+                await this.goodsInfoRepository.findOneBy({ id: order.goodsInfoId }).then(res => {
+                    goodsinfo = res
+                }, err => {
+                    console.log(err)
+                    return { code: 200, msg: MessageInfo.Fail, data: {} }
+                })
+                let skus: GoodsSpecsInfo[]
+                await this.goodsSpecsInfoRepository.find({ select: ['value'], where: { id: In(goodsinfo.specsInfoIds.split(',')) } }).then(res => {
+                    skus = res
+                }, err => {
+                    console.log(err)
+                    return { code: 200, msg: MessageInfo.Fail, data: {} }
+                })
+                order.goods = {
+                    name: goods.name,
+                    title: goods.title,
+                    images: goods.images
+                }
+                order.goodsinfo = {
+                    price: goodsinfo.price,
+                    couponPrice: goodsinfo.couponPrice
+                }
+                const skuvalues: string[] = []
+                for (let i = 0; i < skus.length; i++) {
+                    skuvalues.push(skus[i].value)
+                }
+                order.sku = skuvalues
+                Ordertemp.push(order)
+            }
+        }
+        return { code: 200, msg: MessageInfo.Success, data: [...Ordertemp] }
     }
 
 }

@@ -148,7 +148,20 @@ export const routes = [
         controller: OrderController,
         action: "callbackOrderDetails",
         verify: query('orderNumber').notEmpty()
-    }
+    },
+    {
+        method: "get",
+        route: "/api/v1/order/list",
+        controller: OrderController,
+        action: "orderList",
+        verify: checkSchema({
+            email: {
+                isEmail: true,
+                errorMessage: '邮箱必填',
+                trim: true,
+            }
+        })
+    },
 ]
 
 // 收集系统所有路径

@@ -13,7 +13,8 @@ export const urlPath = [
     '/api/v1/getAnswer',
     '/api/v1/createOrder',
     '/api/v1/notifyUrl',
-    '/api/v1/order/page'
+    '/api/v1/order/page',
+    '/api/v1/order/list'
 ]
 
 
@@ -31,9 +32,9 @@ export const OrderConfig = {
     // 商户id
     mchId: '1699096136',
     // 支付通知地址
-    notify_url: 'http://minimall.cocoball.vip/api/v1/notifyUrl',
+    notify_url: 'https://minimall.cocoball.vip/api/v1/notifyUrl',
     // 支付成功后用户点击返回商户地址
-    return_url: 'http://minimall.cocoball.vip',
+    return_url: 'https://minimall.cocoball.vip',
     // 商户密钥
     mchSign: 'ca2d39fa2344e8527a29c107da5b7cd6',
     // api支付请求模式
