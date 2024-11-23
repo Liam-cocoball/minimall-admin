@@ -53,9 +53,6 @@ export class Order {
     // 修改时间
     @UpdateDateColumn({ name: 'update_time' })
     updateTime: string
-    // skuid
-    @Column()
-    skuid: string
 }
 
 export class OrderE {

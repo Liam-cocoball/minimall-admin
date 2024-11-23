@@ -64,7 +64,7 @@ export class OrderController {
             return { code: 501, message: MessageInfo.Fail, data: result.array() }
         }
         // 参数
-        const { email, goodsId, playFunc, count, skuid } = request.body
+        const { email, goodsId, playFunc, count } = request.body
         // 生成订单
         let order = new Order()
         order.email = email
@@ -101,15 +101,13 @@ export class OrderController {
                 if (order.count > gooddsInfo.inventory) {
                     throw new Error("商品库存不足")
                 }
-                //TODO 用户传入的skuid要和数据库中的skuid比较，防止直接调用接口乱传入参数
-                order.skuid = skuid
                 // 查询spu
                 const goods = await transactionalEntityManager.findOneBy(Goods, { id: gooddsInfo.goodsId })
                 if (!goods) {
                     throw new Error("查询商品错误")
                 }
                 order.goodsInfoId = goodsId
-                order.playMoney = parseInt((gooddsInfo.couponPrice * order.count).toFixed(2))
+                order.playMoney = gooddsInfo.couponPrice * order.count
                 order.goodsId = goods.id
                 order.mchId = OrderConfig.mchId
                 // 组合支付请求参数
